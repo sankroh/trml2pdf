@@ -26,10 +26,10 @@ def text_get(node):
 	return rc
 
 units = [
-	(re.compile('^(-?[0-9\.]+)\s*in$'), reportlab.lib.units.inch),
-	(re.compile('^(-?[0-9\.]+)\s*cm$'), reportlab.lib.units.cm),  
-	(re.compile('^(-?[0-9\.]+)\s*mm$'), reportlab.lib.units.mm),
-	(re.compile('^(-?[0-9\.]+)\s*$'), 1)
+	(re.compile(r'^(-?[0-9\.]+)\s*in$'), reportlab.lib.units.inch),
+	(re.compile(r'^(-?[0-9\.]+)\s*cm$'), reportlab.lib.units.cm),
+	(re.compile(r'^(-?[0-9\.]+)\s*mm$'), reportlab.lib.units.mm),
+	(re.compile(r'^(-?[0-9\.]+)\s*$'), 1)
 ]
 
 def unit_get(size):

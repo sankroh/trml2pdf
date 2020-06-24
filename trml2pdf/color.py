@@ -20,7 +20,7 @@ import re
 
 allcols = colors.getAllNamedColors()
 
-regex_t = re.compile('\(([0-9\.]*),([0-9\.]*),([0-9\.]*)\)')
+regex_t = re.compile(r'\(([0-9\.]*),([0-9\.]*),([0-9\.]*)\)')
 regex_h = re.compile('#([0-9a-zA-Z][0-9a-zA-Z])([0-9a-zA-Z][0-9a-zA-Z])([0-9a-zA-Z][0-9a-zA-Z])')
 
 def get(col_str):
