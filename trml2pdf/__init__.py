@@ -15,4 +15,5 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-from trml2pdf import parseString
+from __future__ import absolute_import
+from trml2pdf.trml2pdf import parseString
