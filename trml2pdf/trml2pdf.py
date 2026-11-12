@@ -20,8 +20,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+from __future__ import print_function, absolute_import
 import sys
-import StringIO
+from io import BytesIO
 import xml.dom.minidom
 import copy
 
@@ -29,8 +30,8 @@ import reportlab
 from reportlab.pdfgen import canvas
 from reportlab import platypus
 
-import utils
-import color
+from trml2pdf import utils
+from trml2pdf import color
 
 #
 # Change this to UTF-8 if you plan tu use Reportlab's UTF-8 support
@@ -250,7 +251,7 @@ class _rml_canvas(object):
 				flow.drawOn(self.canvas,infos['x'],infos['y'])
 				infos['height']-=h
 			else:
-				raise ValueError, "Not enough space"
+				raise ValueError("Not enough space")
 
 	def _line_mode(self, node):
 		ljoin = {'round':1, 'mitered':0, 'bevelled':2}
@@ -270,11 +271,16 @@ class _rml_canvas(object):
 			self.canvas.setDash(node.getAttribute('dash').split(','))
 
 	def _image(self, node):
-		import urllib
+		from urllib.request import urlopen
 		from reportlab.lib.utils import ImageReader
-		u = urllib.urlopen(str(node.getAttribute('file')))
-		s = StringIO.StringIO()
-		s.write(u.read())
+
+		s = BytesIO()
+		filename = str(node.getAttribute('file'))
+		if filename.startswith('/'):
+			with open(filename, 'rb') as u:
+				s.write(u.read())
+		else:
+			s.write(urlopen(filename).read())
 		s.seek(0)
 		img = ImageReader(s)
 		(sx,sy) = img.getSize()
@@ -501,7 +507,7 @@ class _rml_template(object):
 		if not node.hasAttribute('pageSize'):
 			pageSize = (utils.unit_get('21cm'), utils.unit_get('29.7cm'))
 		else:
-			ps = map(lambda x:x.strip(), node.getAttribute('pageSize').replace(')', '').replace('(', '').split(','))
+			ps = [x.strip() for x in node.getAttribute('pageSize').replace(')', '').replace('(', '').split(',')]
 			pageSize = ( utils.unit_get(ps[0]),utils.unit_get(ps[1]) )
 		cm = reportlab.lib.units.cm
 		self.doc_tmpl = platypus.BaseDocTemplate(out, pagesize=pageSize, **utils.attr_get(node, ['leftMargin','rightMargin','topMargin','bottomMargin'], {'allowSplitting':'int','showBoundary':'bool','title':'str','author':'str'}))
@@ -530,25 +536,25 @@ class _rml_template(object):
 def parseString(data, fout=None):
 	r = _rml_doc(data)
 	if fout:
-		fp = file(fout,'wb')
+		fp = open(fout,'wb')
 		r.render(fp)
 		fp.close()
 		return fout
 	else:
-		fp = StringIO.StringIO()
+		fp = BytesIO()
 		r.render(fp)
 		return fp.getvalue()
 
 def trml2pdf_help():
-	print 'Usage: trml2pdf input.rml >output.pdf'
-	print 'Render the standard input (RML) and output a PDF file'
+	print('Usage: trml2pdf input.rml >output.pdf')
+	print('Render the standard input (RML) and output a PDF file')
 	sys.exit(0)
 
 if __name__=="__main__":
 	if len(sys.argv)>1:
 		if sys.argv[1]=='--help':
 			trml2pdf_help()
-		print parseString(file(sys.argv[1], 'r').read()),
+		sys.stdout.buffer.write(parseString(open(sys.argv[1], 'rb').read()))
 	else:
-		print 'Usage: trml2pdf input.rml >output.pdf'
-		print 'Try \'trml2pdf --help\' for more information.'
+		print('Usage: trml2pdf input.rml >output.pdf')
+		print('Try \'trml2pdf --help\' for more information.')
